@@ -83,12 +83,6 @@ else ()
 	set (CMAKE_CXX_STANDARD 11)
 endif ()
 
-# Boost required for any and cstdint on MSVC < 2010
-find_package(Boost COMPONENTS REQUIRED)
-if(MSVC AND (MSVC_VERSION LESS 1600))
-	add_definitions(-DBOOST_STDINT)
-endif(MSVC AND (MSVC_VERSION LESS 1600))
-
 # openmp
 set(USE_OPEN_MP TRUE CACHE BOOL "Set to FALSE to not use OpenMP")
 if (USE_OPEN_MP)
@@ -143,7 +137,7 @@ else (USE_OPEN_CL)
 endif (USE_OPEN_CL)
 
 # include all libs so far
-include_directories(${CMAKE_SOURCE_DIR} ${EIGEN_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
+include_directories(${CMAKE_SOURCE_DIR} ${EIGEN_INCLUDE_DIR})
 
 # main nabo lib
 set(NABO_SRC
@@ -204,9 +198,12 @@ set(libnabo_library $<TARGET_FILE:${LIB_NAME}>)
 
 # Create variable for the local build tree
 get_property(libnabo_include_dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-# Configure config file for local build tree
+# Configure & generate config file for local build tree
 configure_file(libnaboConfig.cmake.in
-	"${PROJECT_BINARY_DIR}/libnaboConfig.cmake" @ONLY)
+	"${PROJECT_BINARY_DIR}/libnaboConfig.cmake.conf" @ONLY)
+file(GENERATE
+	OUTPUT "${PROJECT_BINARY_DIR}/libnaboConfig.cmake"
+	INPUT "${PROJECT_BINARY_DIR}/libnaboConfig.cmake.conf")
 
 # 2- installation build #
 
@@ -219,7 +216,6 @@ set(libnabo_include_dirs ${CMAKE_INSTALL_PREFIX}/include)
 # We put the generated file for installation in a different repository (i.e., ./CMakeFiles/)
 configure_file(libnaboConfig.cmake.in
 	"${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libnaboConfig.cmake.conf" @ONLY)
-
 file(GENERATE
 	OUTPUT "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libnaboConfig.cmake"
 	INPUT "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libnaboConfig.cmake.conf")
