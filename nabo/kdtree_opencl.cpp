@@ -41,10 +41,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <queue>
 #include <algorithm>
 // #include <map>
-#include <boost/numeric/conversion/bounds.hpp>
-#include <boost/limits.hpp>
-#include <boost/format.hpp>
-#include <boost/thread.hpp>
+#include <mutex>
+#include<thread>
 
 
 /*!	\file kdtree_opencl.cpp
@@ -203,7 +201,7 @@ namespace Nabo
 		//! Create a new contexc for a given type of device
 		cl::Context& createContext(const cl_device_type deviceType)
 		{
-			boost::mutex::scoped_lock lock(mutex);
+			std::unique_lock lock(mutex);
 			Devices::iterator it(devices.find(deviceType));
 			if (it == devices.end())
 			{
@@ -216,7 +214,7 @@ namespace Nabo
 		//! Return the cache for a given type of device
 		SourceCacher* getSourceCacher(const cl_device_type deviceType)
 		{
-			boost::mutex::scoped_lock lock(mutex);
+			std::unique_lock lock(mutex);
 			Devices::iterator it(devices.find(deviceType));
 			if (it == devices.end())
 				throw runtime_error("Attempt to get source cacher before creating a context");
@@ -225,7 +223,7 @@ namespace Nabo
 		
 	protected:
 		Devices devices; //!< devices with caches
-		boost::mutex mutex; //!< mutex to protect concurrent accesses to devices
+		std::mutex mutex; //!< mutex to protect concurrent accesses to devices
 	};
 	
 	//! Static instance of context manager
@@ -545,7 +543,7 @@ namespace Nabo
 		const unsigned maxStackDepth(getTreeDepth(nodes.size()) + 1);
 		
 		// init openCL
-		initOpenCL("knn_kdtree_pt_in_leaves.cl", "knnKDTree", (boost::format("#define MAX_STACK_DEPTH %1%\n") % maxStackDepth).str());
+		initOpenCL("knn_kdtree_pt_in_leaves.cl", "knnKDTree", "#define MAX_STACK_DEPTH " << maxStackDepth << "\n");
 		
 		// map nodes, for info about alignment, see sect 6.1.5 
 		const size_t nodesCLSize(nodes.size() * sizeof(Node));
@@ -672,7 +670,7 @@ namespace Nabo
 		const unsigned maxStackDepth(getTreeDepth(nodes.size()) + 1);
 		
 		// init openCL
-		initOpenCL("knn_kdtree_pt_in_nodes.cl", "knnKDTree", (boost::format("#define MAX_STACK_DEPTH %1%\n") % maxStackDepth).str());
+		initOpenCL("knn_kdtree_pt_in_nodes.cl", "knnKDTree", "#define MAX_STACK_DEPTH " << maxStackDepth << "\n");
 		
 		// map nodes, for info about alignment, see sect 6.1.5 
 		const size_t nodesCLSize(nodes.size() * sizeof(Node));

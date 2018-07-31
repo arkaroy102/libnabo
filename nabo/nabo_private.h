@@ -34,12 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "nabo.h"
 
-#ifdef BOOST_STDINT
-	#include <boost/cstdint.hpp>
-	using boost::uint32_t;
-#else // BOOST_STDINT
-	#include <stdint.h>
-#endif // BOOST_STDINT
+#include <stdint.h>
 
 // OpenCL
 #ifdef HAVE_OPENCL
