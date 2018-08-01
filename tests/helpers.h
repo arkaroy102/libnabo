@@ -39,7 +39,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 
 #include <cstdint>
-using std::uint64_t;
 
 using namespace std;
 using namespace Nabo;
